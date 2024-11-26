@@ -11,7 +11,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.fragment.app.Fragment
-import com.appfiction.period_picker.R
 import com.appfiction.periodpicker.model.Period
 import com.skydoves.powerspinner.PowerSpinnerView
 import java.util.Date

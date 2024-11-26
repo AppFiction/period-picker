@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.appfiction.period_picker"
+    namespace = "com.appfiction.periodpicker"
     compileSdk = 32
 
     defaultConfig {
