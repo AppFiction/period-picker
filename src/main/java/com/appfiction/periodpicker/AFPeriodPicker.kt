@@ -3,7 +3,9 @@ package com.appfiction.periodpicker
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.activity.result.ActivityResult
@@ -11,10 +13,12 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import com.appfiction.periodpicker.model.Period
 import com.skydoves.powerspinner.PowerSpinnerView
+import com.skydoves.powerspinner.SpinnerAnimation
 import java.util.Date
 
 class AFPeriodPicker @JvmOverloads constructor(
@@ -42,19 +46,52 @@ class AFPeriodPicker @JvmOverloads constructor(
         imageView = view.findViewById(R.id.iconView)
         spinnerView = view.findViewById(R.id.dateRangesSpinner)
 
-        // Optional: Initialize custom attributes if needed
         context.theme.obtainStyledAttributes(attrs, R.styleable.AFPeriodPicker, 0, 0).apply {
             try {
                 val hint = getString(R.styleable.AFPeriodPicker_spinnerHint)
                 val iconVisibility = getBoolean(R.styleable.AFPeriodPicker_iconVisibility, true)
+                val textColor = getColor(R.styleable.AFPeriodPicker_spinnerTextColor, Color.BLACK)
+                val textSize = getDimension(R.styleable.AFPeriodPicker_spinnerTextSize, 14f)
+                val backgroundRes = getResourceId(R.styleable.AFPeriodPicker_spinnerBackground, -1)
+                val textColorHint =
+                    getColor(R.styleable.AFPeriodPicker_spinnerTextColorHint, Color.GRAY)
+                val popupBackgroundRes =
+                    getResourceId(R.styleable.AFPeriodPicker_spinnerPopupBackground, -1)
+                val popupAnimationValue = getInt(R.styleable.AFPeriodPicker_spinnerPopupAnimation, SpinnerAnimation.NORMAL.value)
+                val iconTint = getColor(R.styleable.AFPeriodPicker_iconTint, Color.BLACK)
+                val spinnerArrowTint = getColor(R.styleable.AFPeriodPicker_spinner_arrow_tint, Color.BLACK)
+
 
                 spinnerView.hint = hint ?: spinnerView.hint
                 imageView.visibility = if (iconVisibility) VISIBLE else GONE
+                spinnerView.setTextColor(textColor)
+                spinnerView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
+
+                if (backgroundRes != -1) {
+                    spinnerView.setBackgroundResource(backgroundRes)
+                }
+
+                if (popupBackgroundRes != -1) {
+                    val popupBackgroundDrawable =
+                        ContextCompat.getDrawable(context, popupBackgroundRes)
+                    spinnerView.spinnerPopupBackground = popupBackgroundDrawable
+                }
+
+
+                val popupAnimation = SpinnerAnimation.values().firstOrNull { it.value == popupAnimationValue }
+                    ?: SpinnerAnimation.NORMAL
+                spinnerView.spinnerPopupAnimation = popupAnimation
+
+                // Apply tint colors
+                imageView.setColorFilter(iconTint)
+                spinnerView.arrowTint = spinnerArrowTint
+                spinnerView.setHintTextColor(textColorHint)
             } finally {
                 recycle()
             }
         }
     }
+
 
     // Constructor for programmatically creating the view
     constructor(
