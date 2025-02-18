@@ -3,7 +3,7 @@
 
     <application>
 
-        <activity android:name="com.appfiction.periodpicker.PeriodPickerModal" />
+<!--        <activity android:name="com.appfiction.periodpicker.PeriodPickerModal" />-->
 
     </application>
 

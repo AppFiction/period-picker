@@ -26,7 +26,7 @@
             android:layout_height="56dp"
             android:gravity="center"
             android:hint="Select time"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/md_grey_900"
             android:textSize="14.5sp"
             app:spinner_arrow_gravity="end"
             app:spinner_arrow_padding="8dp"

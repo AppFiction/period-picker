@@ -3,7 +3,9 @@ package com.appfiction.periodpicker
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.activity.result.ActivityResult
@@ -15,7 +17,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import com.appfiction.periodpicker.model.Period
 import com.skydoves.powerspinner.PowerSpinnerView
+import skedgo.datetimerangepicker.DateTimeRangePickerActivity
 import java.util.Date
+import java.util.TimeZone
 
 class AFPeriodPicker @JvmOverloads constructor(
     context: Context,
@@ -42,14 +46,21 @@ class AFPeriodPicker @JvmOverloads constructor(
         imageView = view.findViewById(R.id.iconView)
         spinnerView = view.findViewById(R.id.dateRangesSpinner)
 
-        // Optional: Initialize custom attributes if needed
         context.theme.obtainStyledAttributes(attrs, R.styleable.AFPeriodPicker, 0, 0).apply {
             try {
                 val hint = getString(R.styleable.AFPeriodPicker_spinnerHint)
                 val iconVisibility = getBoolean(R.styleable.AFPeriodPicker_iconVisibility, true)
+                val textSize =
+                    getDimension(R.styleable.AFPeriodPicker_spinnerTextSize, spinnerView.textSize)
+                val hintColor =
+                    getColor(R.styleable.AFPeriodPicker_spinnerTextColorHint, Color.GRAY)
 
                 spinnerView.hint = hint ?: spinnerView.hint
                 imageView.visibility = if (iconVisibility) VISIBLE else GONE
+                spinnerView.setHintTextColor(hintColor)
+                spinnerView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
+                imageView.setColorFilter(spinnerView.currentTextColor)
+
             } finally {
                 recycle()
             }
@@ -63,7 +74,6 @@ class AFPeriodPicker @JvmOverloads constructor(
         baseFragment: Fragment,
         onDateRangeSelected: ((Period) -> Unit)? = null
     ) : this(context) {
-
         setup(dateRanges, baseFragment, onDateRangeSelected)
     }
 
@@ -88,7 +98,6 @@ class AFPeriodPicker @JvmOverloads constructor(
         baseFragment: Fragment,
         onDateRangeSelected: ((Period) -> Unit)? = null
     ) {
-
         this.onDateRangeSelected = onDateRangeSelected
         lifecycleOwner = baseFragment.viewLifecycleOwner
         rangePickerLauncher = baseFragment.registerForActivityResult(
@@ -101,7 +110,11 @@ class AFPeriodPicker @JvmOverloads constructor(
 
     // Function to open the custom range calendar
     private fun openRangeCalendar() {
-        val intent = Intent(context, PeriodPickerModal::class.java)
+        val intent = DateTimeRangePickerActivity.newIntent(
+            context,
+            TimeZone.getDefault(),
+            null, null
+        )
         rangePickerLauncher.launch(intent)
     }
 
@@ -114,7 +127,6 @@ class AFPeriodPicker @JvmOverloads constructor(
 
         spinnerView.setOnClickListener {
             refreshItems(newDateRanges)
-
             spinnerView.setItems(this.dateRanges)
             spinnerView.showOrDismiss()
         }
@@ -124,7 +136,6 @@ class AFPeriodPicker @JvmOverloads constructor(
                 spinnerAdapter!!.setSelectedIndex(newIndex)
                 spinnerView.dismiss() // Dismiss dropdown
                 spinnerView.text = "${newRange.name}\n${newRange.description}"
-
                 // Trigger callback
                 onDateRangeSelected?.invoke(spinnerAdapter!!.getSelectedItem())
             } else if (newRange.type == Period.Type.Custom) {
@@ -155,9 +166,8 @@ class AFPeriodPicker @JvmOverloads constructor(
     // Handle the result from the custom range picker
     private fun handleRangePickerResult(result: ActivityResult) {
         if (result.resultCode == Activity.RESULT_OK) {
-            val startDateMillis = result.data?.getLongExtra("startDate", 0L)
-            val endDateMillis = result.data?.getLongExtra("endDate", 0L)
-
+            val startDateMillis = result.data?.getLongExtra("startTimeInMillis", 0L)
+            val endDateMillis = result.data?.getLongExtra("endTimeInMillis", 0L)
             if (startDateMillis != null && endDateMillis != null) {
                 val updatedItem = spinnerAdapter?.getSelectedItem()?.apply {
                     type = Period.Type.Range
@@ -167,11 +177,9 @@ class AFPeriodPicker @JvmOverloads constructor(
                     monthChange = null
                     secondsChange = null
                 }
-
                 spinnerView.selectItemByIndex(spinnerAdapter!!.getItemIndex(updatedItem!!))
                 spinnerView.dismiss()
                 spinnerView.text = "${updatedItem.name}\n${updatedItem.description}"
-
                 // Trigger callback
                 onDateRangeSelected?.invoke(updatedItem)
             }
@@ -181,5 +189,5 @@ class AFPeriodPicker @JvmOverloads constructor(
     }
 
     fun getSelectedItem(): Period = spinnerAdapter!!.getSelectedItem()
-
 }
+

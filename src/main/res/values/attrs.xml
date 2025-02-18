@@ -3,6 +3,9 @@
     <declare-styleable name="AFPeriodPicker">
         <attr name="spinnerHint" format="string" />
         <attr name="iconVisibility" format="boolean" />
+        <attr name="spinnerTextColorHint" format="color" />
+        <attr name="spinnerTextSize" format="dimension" />
     </declare-styleable>
+
 
 </resources>

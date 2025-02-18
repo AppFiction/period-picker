@@ -32,7 +32,9 @@ data class Period(
     var secondsChange: Long? = null, // Added secondsChange for adjusting time by seconds
     var type: Type? = null,  // Default value for type is Dummy
     var minTime: Date? = null,
-    var maxTime: Date? = null
+    var maxTime: Date? = null,
+    var showTime: Boolean = false,      // Whether to include time in the format
+    var use24HourFormat: Boolean = true // Whether to use 24-hour format
 ) {
 
     enum class Type {
@@ -46,7 +48,6 @@ data class Period(
      */
     val calculatedMinTime: Date?
         get() {
-            // Use provided minTime if available, else calculate based on monthChange or secondsChange
             return minTime ?: calculateMinTimeBasedOnChange()
         }
 
@@ -68,7 +69,7 @@ data class Period(
         } else if (secondsChange != null) {
             c.add(Calendar.SECOND, secondsChange!!.toInt()) // Adjust by seconds
         }
-        return c.time // Return calculated time as Firestore Timestamp
+        return c.time
     }
 
     /**
@@ -86,20 +87,14 @@ data class Period(
                     val minDate = c.time
                     val minCal = Calendar.getInstance()
                     minCal.time = minDate
-                    var formatStr = DATE_FORMAT2
-                    if (maxCal[Calendar.YEAR] != minCal[Calendar.YEAR]) {
-                        formatStr = DATE_FORMAT1
-                    }
+                    val formatStr = getDateFormat(minCal, maxCal)
                     formatTime(formatStr, minDate) + " - " + formatTime(formatStr, maxDate)
                 }
 
                 minTime != null && maxTime != null -> {
-                    var formatStr = DATE_FORMAT2
                     val minCal = Calendar.getInstance().apply { time = minTime!! }
-                    val maxCal = Calendar.getInstance().apply { time = maxTime!!}
-                    if (maxCal[Calendar.YEAR] != minCal[Calendar.YEAR]) {
-                        formatStr = DATE_FORMAT1
-                    }
+                    val maxCal = Calendar.getInstance().apply { time = maxTime!! }
+                    val formatStr = getDateFormat(minCal, maxCal)
                     formatTime(formatStr, minTime!!) + " - " + formatTime(formatStr, maxTime!!)
                 }
 
@@ -112,16 +107,24 @@ data class Period(
                     val minDate = c.time
                     val minCal = Calendar.getInstance()
                     minCal.time = minDate
-                    var formatStr = DATE_FORMAT2
-                    if (maxCal[Calendar.YEAR] != minCal[Calendar.YEAR]) {
-                        formatStr = DATE_FORMAT1
-                    }
+                    val formatStr = getDateFormat(minCal, maxCal)
                     formatTime(formatStr, minDate) + " - " + formatTime(formatStr, maxDate)
                 }
 
                 else -> name
             }
         }
+
+    /**
+     * Determines the date format to use based on the settings and time range.
+     */
+    private fun getDateFormat(minCal: Calendar, maxCal: Calendar): String {
+        return when {
+            showTime && use24HourFormat -> if (minCal[Calendar.YEAR] != maxCal[Calendar.YEAR]) DATE_FORMAT_LONG_24H else DATE_FORMAT_SHORT_24H
+            showTime && !use24HourFormat -> if (minCal[Calendar.YEAR] != maxCal[Calendar.YEAR]) DATE_FORMAT_LONG_12H else DATE_FORMAT_SHORT_12H
+            else -> if (minCal[Calendar.YEAR] != maxCal[Calendar.YEAR]) DATE_FORMAT_LONG else DATE_FORMAT_SHORT
+        }
+    }
 
     /**
      * Utility method to format time (if needed)
@@ -131,9 +134,12 @@ data class Period(
         return formatter.format(date)
     }
 
-
     companion object {
-        const val DATE_FORMAT2 = "MMM d"
-        const val DATE_FORMAT1 = "MMM d yyyy"
+        const val DATE_FORMAT_SHORT = "MMM d"                  // e.g., "Jan 5"
+        const val DATE_FORMAT_LONG = "MMM d yyyy"              // e.g., "Jan 5 2025"
+        const val DATE_FORMAT_SHORT_12H = "MMM d, h:mm a"      // e.g., "Jan 5, 3:45 PM"
+        const val DATE_FORMAT_LONG_12H = "MMM d yyyy, h:mm a"  // e.g., "Jan 5 2025, 3:45 PM"
+        const val DATE_FORMAT_SHORT_24H = "MMM d, HH:mm"       // e.g., "Jan 5, 15:45"
+        const val DATE_FORMAT_LONG_24H = "MMM d yyyy, HH:mm"   // e.g., "Jan 5 2025, 15:45"
     }
 }
