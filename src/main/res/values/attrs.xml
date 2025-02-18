@@ -3,9 +3,18 @@
     <declare-styleable name="AFPeriodPicker">
         <attr name="spinnerHint" format="string" />
         <attr name="iconVisibility" format="boolean" />
-        <attr name="spinnerTextColorHint" format="color" />
         <attr name="spinnerTextSize" format="dimension" />
+        <attr name="spinnerBackground" format="reference" />
+        <attr name="spinnerPopupBackground" format="reference" />
+        <attr name="spinnerTextColorHint" format="color" />
+        <attr name="spinnerPopupAnimation">
+            <enum name="dropdown" value="0" />
+            <enum name="fade" value="1" />
+            <enum name="bounce" value="2" />
+            <enum name="normal" value="3" />
+        </attr>
+        <attr name="iconTint" format="color" />
+        <attr name="spinner_arrow_tint" format="color" />
     </declare-styleable>
-
 
 </resources>
