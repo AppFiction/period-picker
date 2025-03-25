@@ -54,17 +54,21 @@ class AFPeriodPicker @JvmOverloads constructor(
                     getDimension(R.styleable.AFPeriodPicker_spinnerTextSize, spinnerView.textSize)
                 val hintColor =
                     getColor(R.styleable.AFPeriodPicker_spinnerTextColorHint, Color.GRAY)
+                val textColor =
+                    getColor(R.styleable.AFPeriodPicker_textColor, spinnerView.currentTextColor)
 
                 spinnerView.hint = hint ?: spinnerView.hint
                 imageView.visibility = if (iconVisibility) VISIBLE else GONE
                 spinnerView.setHintTextColor(hintColor)
                 spinnerView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
-                imageView.setColorFilter(spinnerView.currentTextColor)
+                spinnerView.setTextColor(textColor) // Set text color
+                imageView.setColorFilter(textColor) // Match icon color with text color
 
             } finally {
                 recycle()
             }
         }
+
     }
 
     // Constructor for programmatically creating the view

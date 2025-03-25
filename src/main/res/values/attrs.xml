@@ -7,6 +7,7 @@
         <attr name="spinnerBackground" format="reference" />
         <attr name="spinnerPopupBackground" format="reference" />
         <attr name="spinnerTextColorHint" format="color" />
+        <attr name="textColor" format="color" /> <!-- New Attribute -->
         <attr name="spinnerPopupAnimation">
             <enum name="dropdown" value="0" />
             <enum name="fade" value="1" />
